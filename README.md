@@ -1,2 +1,2 @@
 # tunnelthing
-P2P-Tunneling based on SYNCTHING-mechanism
+P2P-Tunneling based on SYNCTHING-mechanism -> https://github.com/syncthing/syncthing
