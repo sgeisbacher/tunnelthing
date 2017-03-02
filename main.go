@@ -1,6 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+	"net"
+	"time"
+
+	"github.com/prometheus/common/log"
+)
 
 func main() {
 	fmt.Println(`
@@ -13,4 +20,29 @@ func main() {
                                                                                                          __/ |  
                                                                                                         |___/   	
 	`)
+
+	ln, err := net.Listen("tcp", ":8080")
+	if err != nil {
+		log.Fatal("err on starting server-socket on :8080:", err)
+	}
+	fmt.Println("server running on :8080")
+
+	// CONNECTION TO BROWSER
+	client, err := ln.Accept()
+	defer client.Close()
+	if err != nil {
+		log.Fatal("err on client connect", err)
+	}
+	fmt.Println("client '%v' connected!", client.RemoteAddr())
+
+	fmt.Println("establishing connection to target-server ...")
+
+	// CONNECTION TO NGINX
+	target, err := net.Dial("tcp", "127.0.0.1:8181")
+	defer target.Close()
+
+	go func() { io.Copy(target, client) }()
+	go func() { io.Copy(client, target) }()
+
+	time.Sleep(10 * time.Second)
 }
